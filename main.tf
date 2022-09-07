@@ -1,9 +1,13 @@
-module "autoscaling" {
-  source      = "./modules/autoscaling"          
-  namespace   = var.namespace                    
-}
- 
 module "networking" {
-  source    = "./modules/networking"             
+  source    = "./modules/networking" 
+  subnet_cidr = var.subnet_cidr            
   namespace = var.namespace                   
 }
+
+module "servers" {
+  source    = "./modules/servers"             
+  namespace = var.namespace                   
+}
+
+
+

@@ -1,4 +1,4 @@
-#terraform version
+#terraform version and backend
 terraform {
   required_providers {
     aws = {
@@ -7,10 +7,10 @@ terraform {
     }
   }
   backend "s3" {
-    bucket = "jespurlqrappinfra"
-    key    = "urlqrapp/production/us-east-1/jespurlqrappinfra/terraform.tfstate"
+    bucket = "jespdatacentre"
+    key    = "jespdatacentre/terraform.tfstate"
     region = "us-east-1"
-    dynamodb_table = "URLQRterraform-state-lock"
+    dynamodb_table = "datacentreterraform-state-lock"
     encrypt        = true
   }
 }
