@@ -1,0 +1,45 @@
+{
+    "variables" : { 
+        "region" : "AWS REGION",
+        "aws_profile": "AWS PROFILE",
+        "source_ami" : "AMAZON LINUX AMI ID",
+        "instance_type": "EC2 INSTANCE TYPE"
+    },
+    "builders" : [
+        {
+            "ami_name" : "jenkins-master-0.0.1-{{timestamp}}",
+            "ami_description" : "Amazon Linux Image with Jenkins Server",
+            "source_ami_filter": {
+                "filters": {
+                  "virtualization-type": "hvm",
+                  "name": "Amazon Linux AMI-*",
+                  "root-device-type": "ebs"
+                },
+                "owners": ["amazon"],
+                "most_recent": true
+            }
+        }
+   ],
+   "provisioners" : [
+        {
+            "type" : "file",                                     
+            "source" : "./scripts",                              
+            "destination" : "/tmp/"                              
+        },
+        {
+            "type" : "file",                                     
+            "source" : "./config",                               
+            "destination" : "/tmp/"                              
+        },
+        {
+            "type" : "file",                                     
+            "source" : "{{user `ssh_key`}}",                     
+            "destination" : "/tmp/id_rsa"                        
+        },
+        {
+            "type" : "shell",                                    
+            "script" : "./Install-Jenkins.sh",                             
+            "execute_command" : "sudo -E -S sh '{{ .Path }}'"    
+        }
+    ]
+}
