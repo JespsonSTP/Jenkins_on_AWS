@@ -4,10 +4,7 @@ module "networking" {
   namespace = var.namespace                   
 }
 
-module "servers" {
-  source    = "./modules/servers"             
-  namespace = var.namespace                   
-}
+
 
 
 
