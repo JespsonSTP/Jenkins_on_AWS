@@ -1,40 +1,61 @@
 #! /bin/bash
+#Downloading jenkins repo
+sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
 
-# Install Java
-yum install java-1.8.0-openjdk.x86_64 -y
-sudo amazon-linux-extras install java-openjdk11 -y
+#Importing jenkins key
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
 
-# Download and Install Jenkins
-yum update –y
-wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat/jenkins.repo
-rpm --import https://pkg.jenkins.io/redhat/jenkins.io.key
-yum install jenkins -y
+#Installing epel
+sudo amazon-linux-extras install epel
 
-# Make sure Jenkins comes up/on when reboot
-chkconfig jenkins on
+#Installing java-openjdk11
+sudo amazon-linux-extras install java-openjdk11
 
-yum install -y git                                                       
-mkdir /var/lib/jenkins/.ssh                                              
-touch /var/lib/jenkins/.ssh/known_hosts                                  
-chown -R jenkins:jenkins /var/lib/jenkins/.ssh                           
-chmod 700 /var/lib/jenkins/.ssh                                          
-mv /tmp/id_rsa /var/lib/jenkins/.ssh/id_rsa                              
-chmod 600 /var/lib/jenkins/.ssh/id_rsa                                   
-chown -R jenkins:jenkins /var/lib/jenkins/.ssh/id_rsa                    
- 
-mkdir -p /var/lib/jenkins/init.groovy.d                                  
-mv /tmp/*.groovy /var/lib/jenkins/init.groovy.d/                         
-mv /tmp/jenkins /etc/sysconfig/jenkins
-chmod +x /tmp/install-plugins.sh 
-# Start Jenkins
-systemctl start jenkins
+#Installing jenkins
+sudo yum install -y jenkins
 
-# Enable Jenkins with systemctl
-systemctl enable jenkins
 
-# Make sure Jenkins comes up/on when reboot
-chkconfig jenkins on
+echo "Setup SSH key"
+mkdir /var/lib/jenkins/.ssh
+touch /var/lib/jenkins/.ssh/known_hosts
+sudo chown -R jenkins:jenkins /var/lib/jenkins/.ssh
+sudo chmod 700 /var/lib/jenkins/.ssh
+sudo mv /tmp/id_rsa /var/lib/jenkins/.ssh/id_rsa
+sudo chmod 600 /var/lib/jenkins/.ssh/id_rsa
+sudo chown -R jenkins:jenkins /var/lib/jenkins/.ssh/id_rsa
 
-yum install -y docker 
-usermod -aG docker ec2-user
-systemctl enable docker
+echo "Configure Jenkins"
+mkdir -p /var/lib/jenkins/init.groovy.d
+mv /tmp/scripts/*.groovy /var/lib/jenkins/init.groovy.d/
+sudo chown -R jenkins:jenkins /var/lib/jenkins/init.groovy.d
+mv /tmp/config/jenkins /etc/sysconfig/jenkins
+sudo chmod +x /tmp/config/install-plugins.sh
+echo "install plugins"
+cd /tmp/config/
+ls
+sudo ./install-plugins.sh
+cd /home/ec2-user
+#Starting jenkins service
+sudo service jenkins start
+
+#Enable jenkins service to start at system boot time
+sudo chkconfig jenkins on
+
+#Installing git
+sudo yum install -y git
+
+#Installing docker
+sudo yum install -y docker
+
+#Starting docker service
+sudo service docker start
+
+#Adding jenkins user to docker group and leaving jenkins user to its supplementary group it was already member of
+sudo usermod -aG docker jenkins
+sudo usermod -aG docker ec2-user
+
+#Providing full access to docker.sock file
+sudo chmod 777 /var/run/docker.sock
+
+#Restarting docker service
+sudo service docker restart

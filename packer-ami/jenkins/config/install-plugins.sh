@@ -11,4 +11,6 @@ installPlugin() {
     curl -L --silent --output ${plugin_dir}/${1}.hpi  https://updates.jenkins-ci.org/latest/${1}.hpi
     return 0
   fi
+
+  echo "plugins are installed"
 }
