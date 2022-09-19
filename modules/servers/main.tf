@@ -1,4 +1,13 @@
-# instance and ami
+data "aws_ami" "jenkins-master" {
+  most_recent = true
+  owners      = ["self"]
+ 
+  filter {
+    name   = "name"
+    values = ["jenkins-master-*"]
+  }
+}
+
 data "aws_ami" "ubuntu-linux-2004" {
   most_recent = true
   owners      = ["099720109477"] # Canonical
@@ -22,13 +31,27 @@ data "aws_ami" "amazon-linux-2" {
   }
 }
 
-resource "aws_instance" "Jenkins-server1a" {
-  ami                         = data.aws_ami.amazon-linux-2
-  instance_type               = var.linux_instance_type
-  subnet_id                   = module.networking.subnet.datacentre-VPC_privsubnet1a.id
-  vpc_security_group_ids      = [aws_security_group.urlshorQR_app-VPC_jenkinSG.id]
+//bastion host
+resource "aws_instance" "bastion" {
+  ami           = data.aws_ami.amazon-linux-2.id
+  instance_type = var.instance_type
+  vpc_security_group_ids = [var.sg.bastion_sg.id]
+  subnet_id = element(var.pub_subnet.datacentre-VPC_pubsubnets, 0).id
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.key_pair.key_name
+  key_name      = "newkey"
+ 
+  tags = {
+    Name = "bastion"
+    Author = "Jespson"
+  }
+}
+
+resource "aws_instance" "Jenkins-server" {
+  ami                         = data.aws_ami.jenkins-master.id
+  instance_type               = var.instance_type
+  subnet_id                   = element(var.priv_subnet.datacentre-VPC_privsubnets, 0).id
+  vpc_security_group_ids      = [var.sg.jenkins_sg.id]
+  key_name                    = "newkey"
   
   # root disk
   root_block_device {
@@ -42,34 +65,14 @@ resource "aws_instance" "Jenkins-server1a" {
   }
 }
 
-resource "aws_instance" "Jenkins-server1b" {
-  ami                         = data.aws_ami.amazon-linux-2
-  instance_type               = var.linux_instance_type
-  subnet_id                   = module.networking.subnet.datacentre-VPC_privsubnet1a.id
-  vpc_security_group_ids      = [aws_security_group.urlshorQR_app-VPC_jenkinSG.id]
-  associate_public_ip_address = true
-  key_name                    = aws_key_pair.key_pair.key_name
-  
-  # root disk
-  root_block_device {
-    volume_type           = "gp3"
-    volume_size           = 30
-    delete_on_termination = false
-  }
- 
-  tags = {
-    Name   = "jenkins_master1b"
-  }
-}
-
 resource "aws_instance" "AnsibleController" {
-  ami                         = data.aws_ami.amazon-linux-2
+  ami                         = data.aws_ami.amazon-linux-2.id
   instance_type               = var.instance_type
-  subnet_id                   = module.networking.subnet.datacentre-VPC_privsubnet1a.id
-  vpc_security_group_ids      = [aws_security_group.urlshorQR_app-VPC_jenkinSG.id]
+  subnet_id                   = element(var.pub_subnet.datacentre-VPC_pubsubnets, 0).id
+  vpc_security_group_ids      = [var.sg.bastion_sg.id]
   associate_public_ip_address = true
-  key_name                    = aws_key_pair.key_pair.key_name
-  user_data                   = file("./Install-Jenkins.sh")
+  user_data                   = file("./InstallAnsibleCN.sh")
+  key_name      = "newkey"
   
   # root disk
   root_block_device {

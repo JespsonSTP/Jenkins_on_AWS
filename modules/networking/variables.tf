@@ -14,7 +14,17 @@ variable "vpc_cidr" {
   default = "172.20.0.0/16"
 }
 
-variable "subnet_cidr" {
+variable "public_cidrs" {
   type = list(string)
-  description = "the cidrs for the vpc"
+  description = "the public cidrs for the vpc"
 }
+
+variable "private_cidrs" {
+  type = list(string)
+  description = "the private cidrs for the vpc"
+}
+
+variable "my_ip" {
+  type = string
+}
+
