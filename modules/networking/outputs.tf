@@ -2,15 +2,20 @@ output "vpc" {
   value = aws_vpc.datacentre-VPC                                     
 }
  
-output "subnet" {
+output "pub_subnet" {
   value = {                                               
-    datacentre-VPC_pubsubnet1a          = aws_subnet.datacentre-VPC_pubsubnet1a           
-    datacentre-VPC_pubsubnet1b          = aws_subnet.datacentre-VPC_pubsubnet1b                            
-    datacentre-VPC_privsubnet1a         = aws_subnet.datacentre-VPC_privsubnet1a      
-    datacentre-VPC_privsubnet1b         = aws_subnet.datacentre-VPC_privsubnet1b      
+    datacentre-VPC_pubsubnets          = "${aws_subnet.datacentre-VPC_pubsubnet.*}"        
+    //datacentre-VPC_pubsubnets          = ["${module.aws_subnet.datacentre-VPC_pubsubnet.*}"]            
   }                                                    
 }
-output "security_groups" {
+
+output "priv_subnet" {
+  value = {                                               
+    datacentre-VPC_privsubnets          = "${aws_subnet.datacentre-VPC_privsubnet.*}"          
+    //datacentre-VPC_pubsubnets          = ["${module.aws_subnet.datacentre-VPC_privsubnet.*}"]          
+  }                                                    
+}
+output "sg" {
   value = {                                               
     bastion_sg     = aws_security_group.bastion_host_sg           
     jenkins_sg     = aws_security_group.jenkins_master_sg                              
