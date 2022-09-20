@@ -24,10 +24,9 @@ resource "aws_internet_gateway" "datacentre-VPC_IGW" {
 
 # Elastic IP for Nat Gateway
 resource "aws_eip" "datacentre-VPC_nat_elastic_ip" {
-  count = 2
   vpc = true
   tags = {
-    "Name" = "datacentre-VPC_Elastic_IP${count.index}"
+    "Name" = "datacentre-VPC_Elastic_IP"
   }
 }
 

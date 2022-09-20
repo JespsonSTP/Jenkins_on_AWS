@@ -1,5 +1,5 @@
 resource "aws_lb_target_group" "jenkins-tg" {
-  port = 80
+  port = 8080
   protocol = "HTTP"
   name = "jenkins-target-group"
   vpc_id = var.vpc.id
@@ -10,7 +10,8 @@ resource "aws_lb_target_group" "jenkins-tg" {
   health_check {
     enabled = true
     protocol = "HTTP"
-    path = "/"
+    path = "/login"
+    port = 8080
     healthy_threshold = 2
     unhealthy_threshold = 2
     timeout = 5
@@ -40,7 +41,7 @@ resource "aws_lb" "jenkins_alb" {
 # Create ALB Listner - HTTP
 resource "aws_lb_listener" "jenkins_http" {
   load_balancer_arn = aws_lb.jenkins_alb.arn
-  port = 8080
+  port = 80
   protocol = "HTTP"
   default_action {
     type = "forward"
