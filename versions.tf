@@ -11,6 +11,6 @@ terraform {
     key    = "jespdatacentre/terraform.tfstate"
     region = "us-east-1"
     dynamodb_table = "datacentreterraform-state-lock"
-    encrypt        = true
+    encrypnt        = true
   }
 }
